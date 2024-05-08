@@ -1,1 +1,1 @@
-Para usar el proyecto se debe crear la variable de entorno para el uso del API. 
+Initial commit
