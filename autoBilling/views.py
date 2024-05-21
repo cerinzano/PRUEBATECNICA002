@@ -1,8 +1,10 @@
+import json
+from django.db import transaction
 from django.http import JsonResponse
 import requests
 from django.shortcuts import get_object_or_404, render
 from .forms import SelectionForm, ProductFormSet
-from .models import Store, Persona, Product
+from .models import Store, Persona, Product, Option, Operation, StoreAvailable
 
 def select_items(request):
     if request.method == 'POST':
@@ -12,6 +14,7 @@ def select_items(request):
         if form.is_valid() and formset.is_valid():
             response = request_availability (request)
             print(response.text)
+            createoperation(response.text)
             # print("--------------------------")
             # print(store.address)
             # print(persona)
@@ -95,3 +98,36 @@ def request_availability (request):
 
     response = requests.post(url, json=payload, headers=headers)
     return response
+
+def createoperation(obj_operation):
+    
+    data = json.loads(obj_operation)
+    
+    with transaction.atomic():
+        for item in data:
+            # Crear o actualizar el registro de StoreAvailable
+            store_data = item['store']
+            store, created = StoreAvailable.objects.update_or_create(
+                id=store_data['id'],
+                defaults={'name': store_data['name']}
+            )
+
+            # Crear o actualizar el registro de Option
+            option, created = Option.objects.update_or_create(
+                id=item['id'],
+                defaults={
+                    'from_time': item['from'],
+                    'to_time': item['to'],
+                    'operational_model': item['operational_model'],
+                    'description': item['description'],
+                    'expires_at': item['expires_at']
+                }
+            )
+
+            # Crear o actualizar el registro de Operation
+            operation, created = Operation.objects.update_or_create(
+                id=item['id']
+            )
+            # Relacionar Operation con StoreAvailable y Option
+            operation.stores.add(store)
+            operation.options.add(option)

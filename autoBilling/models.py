@@ -64,3 +64,30 @@ class Job(models.Model):
     description = models.CharField(max_length=255)
     expires_at = models.DateTimeField()
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='jobs')
+
+class StoreAvailable(models.Model):
+    id = models.CharField(max_length=255, primary_key=True)
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+class Operation(models.Model):
+    id = models.CharField(max_length=255, primary_key=True)
+    stores = models.ManyToManyField(StoreAvailable, related_name='operations')
+    options = models.ManyToManyField('Option', related_name='operations')
+
+    def __str__(self):
+        return f"Operation {self.id}"
+
+class Option(models.Model):
+    id = models.CharField(max_length=255, primary_key=True)
+    from_time = models.DateTimeField()
+    to_time = models.DateTimeField()
+    operational_model = models.CharField(max_length=50)
+    description = models.CharField(max_length=255)
+    expires_at = models.DateTimeField()
+
+    def __str__(self):
+        return f"Option {self.id}"
+
