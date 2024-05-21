@@ -1,3 +1,5 @@
+import random
+import string
 import uuid
 from django.db import models
 
@@ -33,7 +35,6 @@ class Persona(models.Model):
 
     def __str__(self):
         return self.name
-
 class Product(models.Model):
     id_item = models.CharField(max_length=50)
     name = models.CharField(max_length=50)
@@ -50,44 +51,26 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-class Task(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255)
-
-class Job(models.Model):
-    id_jwt = models.CharField(max_length=255, primary_key=True)
-    from_datetime = models.DateTimeField()
-    to_datetime = models.DateTimeField()
-    operational_model = models.CharField(max_length=255)
-    store_id = models.CharField(max_length=255)
-    store_name = models.CharField(max_length=255)
-    description = models.CharField(max_length=255)
-    expires_at = models.DateTimeField()
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='jobs')
-
-class StoreAvailable(models.Model):
-    id = models.CharField(max_length=255, primary_key=True)
-    name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.name
-
 class Operation(models.Model):
-    id = models.CharField(max_length=255, primary_key=True)
-    stores = models.ManyToManyField(StoreAvailable, related_name='operations')
-    options = models.ManyToManyField('Option', related_name='operations')
+    id = models.AutoField(primary_key=True)
 
     def __str__(self):
         return f"Operation {self.id}"
 
-class Option(models.Model):
-    id = models.CharField(max_length=255, primary_key=True)
+class Job(models.Model):
+    id = models.AutoField(primary_key=True)
+    id_job = models.CharField(max_length=1000)
     from_time = models.DateTimeField()
     to_time = models.DateTimeField()
     operational_model = models.CharField(max_length=50)
     description = models.CharField(max_length=255)
     expires_at = models.DateTimeField()
+    store_id = models.CharField(max_length=255)
+    store_name = models.CharField(max_length=255)
+    store_id = models.CharField(max_length=255)
+    store_name = models.CharField(max_length=255)
+    operation = models.ForeignKey(Operation, on_delete=models.CASCADE, related_name='jobs')
 
     def __str__(self):
-        return f"Option {self.id}"
+        return f"Job {self.id}"
 

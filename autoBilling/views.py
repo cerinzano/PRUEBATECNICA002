@@ -1,10 +1,31 @@
 import json
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 import requests
 from django.shortcuts import get_object_or_404, render
 from .forms import SelectionForm, ProductFormSet
-from .models import Store, Persona, Product, Option, Operation, StoreAvailable
+from .models import Store, Persona, Product, Operation, Job
+
+# def option_list(request):
+#     options = Option.objects.all()
+#     return render(request, 'option_list.html', {'options': options})
+
+def operation_list(request):
+    return HttpResponse('No options selected')
+    # if request.method == 'POST':
+        # selected_options = {}
+        # for operation in Operation.objects.all():
+        #     selected_option_id = request.POST.get(f'selected_option_{operation.id}')
+        #     if selected_option_id:
+        #         selected_options[operation.id] = selected_option_id
+        # if selected_options:
+        #     return HttpResponse(f'Selected Options: {selected_options}')
+        # else:
+            # return HttpResponse('No options selected')
+
+    # operations = Operation.objects.all().prefetch_related('options')
+    # return render(request, 'autoBilling/operation_list.html', {'operations': operations})
+
 
 def select_items(request):
     if request.method == 'POST':
@@ -95,7 +116,6 @@ def request_availability (request):
         "content-type": "application/json",
         "x-api-key": "yoJYongi4V4m0S4LClubdyiu5nq6VIpxazcFaghi"
     }
-
     response = requests.post(url, json=payload, headers=headers)
     return response
 
@@ -104,30 +124,21 @@ def createoperation(obj_operation):
     data = json.loads(obj_operation)
     
     with transaction.atomic():
+
+        operation = Operation.objects.create()
         for item in data:
             # Crear o actualizar el registro de StoreAvailable
-            store_data = item['store']
-            store, created = StoreAvailable.objects.update_or_create(
-                id=store_data['id'],
-                defaults={'name': store_data['name']}
+            # Crear el registro de Job
+            job = Job.objects.create(
+                id_job=item['id'],
+                from_time=item['from'],
+                to_time=item['to'],
+                operational_model=item['operational_model'],
+                description=item['description'],
+                expires_at=item['expires_at'],
+                store_id=item['store']['id'],
+                store_name=item['store']['name'],
+                operation=operation
             )
 
-            # Crear o actualizar el registro de Option
-            option, created = Option.objects.update_or_create(
-                id=item['id'],
-                defaults={
-                    'from_time': item['from'],
-                    'to_time': item['to'],
-                    'operational_model': item['operational_model'],
-                    'description': item['description'],
-                    'expires_at': item['expires_at']
-                }
-            )
 
-            # Crear o actualizar el registro de Operation
-            operation, created = Operation.objects.update_or_create(
-                id=item['id']
-            )
-            # Relacionar Operation con StoreAvailable y Option
-            operation.stores.add(store)
-            operation.options.add(option)
