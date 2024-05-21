@@ -8,9 +8,9 @@ class Store(models.Model):
     address = models.CharField(max_length=100)
     address_two = models.CharField(max_length=100)
     description = models.TextField()
-    country = models.CharField(max_length=50)
+    city = models.CharField(max_length=50)  # Campo nuevo
     state = models.CharField(max_length=50)
-    country = models.CharField(max_length=50)
+    country = models.CharField(max_length=50)  # Corregido el duplicado
     zip_code = models.CharField(max_length=10)
     latitude = models.FloatField()
     longitude = models.FloatField()
@@ -24,9 +24,9 @@ class Persona(models.Model):
     address = models.CharField(max_length=100)
     address_two = models.CharField(max_length=100)
     description = models.TextField()
-    country = models.CharField(max_length=50)
+    city = models.CharField(max_length=50)  # Campo nuevo
     state = models.CharField(max_length=50)
-    country = models.CharField(max_length=50)
+    country = models.CharField(max_length=50)  # Corregido el duplicado
     zip_code = models.CharField(max_length=10)
     latitude = models.FloatField()
     longitude = models.FloatField()
