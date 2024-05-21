@@ -6,27 +6,6 @@ from django.shortcuts import get_object_or_404, render
 from .forms import SelectionForm, ProductFormSet
 from .models import Store, Persona, Product, Operation, Job
 
-# def option_list(request):
-#     options = Option.objects.all()
-#     return render(request, 'option_list.html', {'options': options})
-
-def operation_list(request):
-    return HttpResponse('No options selected')
-    # if request.method == 'POST':
-        # selected_options = {}
-        # for operation in Operation.objects.all():
-        #     selected_option_id = request.POST.get(f'selected_option_{operation.id}')
-        #     if selected_option_id:
-        #         selected_options[operation.id] = selected_option_id
-        # if selected_options:
-        #     return HttpResponse(f'Selected Options: {selected_options}')
-        # else:
-            # return HttpResponse('No options selected')
-
-    # operations = Operation.objects.all().prefetch_related('options')
-    # return render(request, 'autoBilling/operation_list.html', {'operations': operations})
-
-
 def select_items(request):
     if request.method == 'POST':
         print("POST")
@@ -141,4 +120,25 @@ def createoperation(obj_operation):
                 operation=operation
             )
 
+def operation_list(request):
+    operations = Operation.objects.prefetch_related('jobs').all()
+    return render(request, 'autoBilling/operation_list.html', {'operations': operations})
+
+def select_job(request, operation_id):
+    operation = get_object_or_404(Operation, pk=operation_id)
+    if request.method == 'POST':
+        selected_job_id = request.POST.get('selected_job')
+        selected_job = get_object_or_404(Job, pk=selected_job_id)
+        return JsonResponse({
+            'id_job': selected_job.id_job,
+            'from_time': selected_job.from_time,
+            'to_time': selected_job.to_time,
+            'operational_model': selected_job.operational_model,
+            'description': selected_job.description,
+            'expires_at': selected_job.expires_at,
+            'store_id': selected_job.store_id,
+            'store_name': selected_job.store_name,
+            'operation_id': selected_job.operation.id
+        })
+    return render(request, 'autoBilling/select_job.html', {'operation': operation})
 
