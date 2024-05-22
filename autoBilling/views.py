@@ -16,7 +16,6 @@ def select_items(request):
             response = request_availability (request)
             print(response.text)
             operation_id = createoperation(response.text)
-            print("-----> createoperation  Operation ID = ", operation_id)
             url = reverse('job_selection', kwargs={'operation_id': operation_id})
             # Redirigir a la URL construida
             return redirect(url)
@@ -133,58 +132,85 @@ def select_job(request, operation_id):
         })
     return render(request, 'autoBilling/select_job.html', {'operation': operation})
 
-def request_create_job (request):
-    url = "https://api.xandar.instaleap.io/jobs"
 
+def request_get_job(job_id):
+    url = f"https://api.xandar.instaleap.io/jobs/{job_id}"
+    headers = {
+        "accept": "application/json",
+        "x-api-key": "yoJYongi4V4m0S4LClubdyiu5nq6VIpxazcFaghi"
+    }
+    response = requests.get(url, headers=headers)
+    return response
+
+def job_detail(request, job_id):
+    # URL del servicio web
+    response = request_get_job(job_id)
+
+    if response.status_code == 200:
+        job_data = response.json()
+        return render(request, 'autoBilling/job_detail.html', {'job': job_data})
+    else:
+        # Manejar el caso de error
+        return render(request, 'autoBilling/job_detail.html', {'error': 'No se pudo obtener la información del Job.'})
+
+
+def request_create_job (Job, Persona, Product):
+    
+    client_reference = str(Job.id) + "-" + Product.id_item
+    print("client reference", client_reference)
+    url = "https://api.xandar.instaleap.io/jobs"
+    order_value = Product.price *  Product.quantity * 1.2
     payload = {
         "recipient": {
-            "name": "Diego Alvarez",
+            "name": Persona.name,
             "email": "alvarez.dr@gmail.com",
             "phone_number": "3016088186"
         },
         "payment_info": {
-            "prices": { "order_value": 100000 },
+            "prices": { "order_value": order_value},
             "payment": { "method": "CASH" },
             "currency_code": "COP"
         },
         "add_delivery_code": True,
         "contact_less": {
             "comment": "LeaveAtTheDoor",
-            "cash_receiver": "Diego Alvarez",
+            "cash_receiver": Persona.name,
             "phone_number": "3016088186"
         },
-        "slot_id": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcm9tIjoiMjAyNC0wNS0yM1QwNzowMDowMC4wMDBaIiwidG8iOiIyMDI0LTA1LTIzVDA4OjU5OjAwLjAwMFoiLCJvcGVyYXRpb25hbE1vZGVsIjoiRlVMTF9TRVJWSUNFIiwic3RhcnRUaW1lQnlUYXNrIjp7IkZVTExfU0VSVklDRSI6eyJzdGFydERhdGUiOiIyMDI0LTA1LTIzVDA2OjIxOjAwLjAwMFoiLCJzdGVwc0R1cmF0aW9uIjpbMTUsMiw3LDEwLDVdfX0sInJlYXNvbiI6IkZBTExCQUNLIiwiam9iUXVvdGVJZCI6IjY3MmYxMmI4LTM5NTYtNGYxYS04MDM5LWZkZTVhZjk5MDYyYyIsImV4cGlyZXNBdCI6IjIwMjQtMDUtMjJUMDE6MDU6NDAuMzA3WiIsImlhdCI6MTcxNjMzOTA0MCwiZXhwIjoxNzE2MzM5OTQwfQ.vd_ALutuoV6jsrakvHiEkJs6S6dKIMQfc1l8yH6Gpz4",
-        "client_reference": "111"
+        "slot_id": Job.id_job,
+        "client_reference": client_reference
     }
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
         "x-api-key": "yoJYongi4V4m0S4LClubdyiu5nq6VIpxazcFaghi"
     }
-
     response = requests.post(url, json=payload, headers=headers)
-
+    return response
 
 def job_selection(request, operation_id):
     operation = get_object_or_404(Operation, id=operation_id)
     jobs = Job.objects.filter(operation=operation)
+    personas = get_object_or_404(Persona, id=operation.persona.id)
+    product = get_object_or_404(Product, id=operation.product.id)
+    
     if request.method == 'POST':
         form = JobSelectionForm(request.POST, operation_id=operation_id)
         if form.is_valid():
             selected_job = form.cleaned_data['job']
-            # Aquí consumimos el servicio web con los datos del Job seleccionado
-            response = requests.post('https://example.com/api/consume', data={
-                'id_job': selected_job.id_job,
-                'from_time': selected_job.from_time,
-                'to_time': selected_job.to_time,
-                'operational_model': selected_job.operational_model,
-                'description': selected_job.description,
-                'expires_at': selected_job.expires_at,
-                'store_id': selected_job.store_id,
-                'store_name': selected_job.store_name,
-            })
-            return render(request, 'operation_success.html', {'response': response.json()})
-            return HttpResponse("Listo el pollo")
+            response = request_create_job (selected_job, personas, product)
+            data = response.json()
+            job_id = data.get('job_id')
+            return redirect('job_detail', job_id=job_id)
+
+            # Redirigir a la URL construida
+            #return redirect(url)
+            # return render(request, 'autoBilling/operation_success.html', {'response': response.json()})
+        
+        
     else:
         form = JobSelectionForm(operation_id=operation_id)
     return render(request, 'autoBilling/job_selection.html', {'operation': operation, 'form': form, 'jobs': jobs})
+
+
+

@@ -53,6 +53,8 @@ class Product(models.Model):
 
 class Operation(models.Model):
     id = models.AutoField(primary_key=True)
+    persona = models.ForeignKey(Persona, on_delete=models.CASCADE, default=1, related_name='personas')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, default=1, related_name='products')
 
     def __str__(self):
         return f"Operation {self.id}"
