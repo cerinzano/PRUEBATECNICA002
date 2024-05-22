@@ -3,7 +3,7 @@ body {
 }
 
 form {
-    max-width: 600px;
+    max-width: 1000;
     margin: auto;
     padding: 20px;
     border: 1px solid #ccc;
@@ -35,3 +35,4 @@ button {
 button:hover {
     background-color: #218838;
 }
+

@@ -1,7 +1,21 @@
 from datetime import timezone
 from django import forms
 from django.forms import ValidationError, formset_factory
-from .models import Store, Persona, Product
+from .models import Store, Persona, Product, Job
+
+class JobSelectionForm(forms.Form):
+    job = forms.ModelChoiceField(
+        queryset=Job.objects.none(), 
+        label='Selecciona un Job',
+        widget=forms.RadioSelect
+    )
+
+    def __init__(self, *args, **kwargs):
+        operation_id = kwargs.pop('operation_id', None)
+        super(JobSelectionForm, self).__init__(*args, **kwargs)
+        if operation_id:
+            self.fields['job'].queryset = Job.objects.filter(operation_id=operation_id)
+
 
 class SelectionForm(forms.Form):
     destine = forms.ModelChoiceField(queryset=Persona.objects.all(), label='Destinatario')

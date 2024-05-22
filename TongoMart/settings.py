@@ -118,6 +118,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
 
 # Add this line if not already present to define where to collect static files during deployment
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

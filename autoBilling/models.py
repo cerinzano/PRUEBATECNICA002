@@ -67,8 +67,6 @@ class Job(models.Model):
     expires_at = models.DateTimeField()
     store_id = models.CharField(max_length=255)
     store_name = models.CharField(max_length=255)
-    store_id = models.CharField(max_length=255)
-    store_name = models.CharField(max_length=255)
     operation = models.ForeignKey(Operation, on_delete=models.CASCADE, related_name='jobs')
 
     def __str__(self):
