@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Facturación</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'autobilling/styles.css' %}">
+</head>
+<body>
+    <h1>Facturación</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="job_id">Job ID:</label>
+        <input type="text" id="job_id" name="job_id" required>
+        <button type="submit">Consultar Facturación</button>
+    </form>
+    
+    {% if error %}
+        <p>{{ error }}</p>
+    {% endif %}
+    
+    {% if payment_info %}
+        <h2>Información de Pago</h2>
+        <table>
+            <tr>
+                <th>ID de Pago</th>
+                <td>{{ payment_info.payment.id }}</td>
+            </tr>
+            <tr>
+                <th>Método</th>
+                <td>{{ payment_info.payment.method }}</td>
+            </tr>
+            <tr>
+                <th>Referencia</th>
+                <td>{{ payment_info.payment.reference }}</td>
+            </tr>
+            <tr>
+                <th>Estado del Pago</th>
+                <td>{{ payment_info.payment.paymentStatus }}</td>
+            </tr>
+            <tr>
+                <th>Valor</th>
+                <td>{{ payment_info.payment.value }}</td>
+            </tr>
+        </table>
+        
+        <h2>Precios</h2>
+        <table>
+            <tr>
+                <th>Subtotal</th>
+                <td>{{ payment_info.prices.subtotal }}</td>
+            </tr>
+            <tr>
+                <th>Envío</th>
+                <td>{{ payment_info.prices.shippingFee }}</td>
+            </tr>
+            <tr>
+                <th>Descuentos</th>
+                <td>{{ payment_info.prices.discounts }}</td>
+            </tr>
+            <tr>
+                <th>Impuestos</th>
+                <td>{{ payment_info.prices.taxes }}</td>
+            </tr>
+            <tr>
+                <th>Valor Total</th>
+                <td>{{ payment_info.prices.orderValue }}</td>
+            </tr>
+        </table>
+        
+        <h2>Factura</h2>
+        <table>
+            <tr>
+                <th>Referencia</th>
+                <td>{{ payment_info.invoice.reference }}</td>
+            </tr>
+            <tr>
+                <th>Adjuntos</th>
+                <td>{{ payment_info.invoice.attachments|join:", " }}</td>
+            </tr>
+        </table>
+    {% endif %}
+</body>
+</html>

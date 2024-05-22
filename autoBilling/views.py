@@ -213,4 +213,58 @@ def job_selection(request, operation_id):
     return render(request, 'autoBilling/job_selection.html', {'operation': operation, 'form': form, 'jobs': jobs})
 
 
+def request_billing (job_id):
+    
+    url = f"https://api.xandar.instaleap.io/jobs/{job_id}/payment_info"
+
+    payload = {
+        "prices": {
+            "attributes": [
+                {
+                    "type": "ORDER_VALUE",
+                    "name": "total",
+                    "value": 10190
+                }
+            ],
+            "subtotal": 100000,
+            "shipping_fee": 1000,
+            "discounts": 0,
+            "taxes": 190,
+            "order_value": 10190
+        },
+        "payment": {
+            "payment_status": "SUCCEEDED",
+            "method": "CASH",
+            "id": "743000",
+            "reference": "VISA *3939",
+            "value": 10190
+        },
+        "invoice": {
+            "reference": "77-BICYCLE001",
+            "attachments": ["PDF"]
+        }
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "x-api-key": "yoJYongi4V4m0S4LClubdyiu5nq6VIpxazcFaghi"
+    }
+
+    response = requests.put(url, json=payload, headers=headers)
+    return response
+
+
+def billing_view(request):
+    payment_info = None
+    error = None
+    if request.method == 'POST':
+        job_id = request.POST.get('job_id')
+        response = request_billing (job_id)        
+        if response.status_code == 200:
+            payment_info = response.json().get('paymentInfo')
+        else:
+            error = 'No se pudo obtener la información de facturación.'
+    
+    return render(request, 'autoBilling/billing.html', {'payment_info': payment_info, 'error': error})
+
 
