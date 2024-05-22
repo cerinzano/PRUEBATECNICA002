@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Seleccionar Job</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'autobilling/styles.css' %}">
+</head>
+<body>
+    <h1>Operación {{ operation.id }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        <h2>Jobs Disponibles</h2>
+        <table>
+            <tr>
+                <th>Seleccionar</th>
+                <th>Desde</th>
+                <th>Hasta</th>
+                <th>Expira</th>
+                <th>Nombre Tienda</th>
+            </tr>
+            {% for job in jobs %}
+            <tr>
+                <td>
+                    <input type="radio" name="job" value="{{ job.id }}">
+                </td>
+                <td>{{ job.from_time }}</td>
+                <td>{{ job.to_time }}</td>
+                <td>{{ job.expires_at }}</td>
+                <td>{{ job.store_name }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <button type="submit">Enviar</button>
+    </form>
+</body>
+</html>
