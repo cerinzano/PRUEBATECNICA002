@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Job List for Operation {{ operation.id }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'autoBilling/style.css' %}">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Job List for Operation {{ operation.id }}</h2>
+    <form method="post" action="{% url 'select_job' operation.id %}">
+        {% csrf_token %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>From Time</th>
+                    <th>To Time</th>
+                    <th>Operational Model</th>
+                    <th>Description</th>
+                    <th>Expires At</th>
+                    <th>Store ID</th>
+                    <th>Store Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in operation.jobs.all %}
+                    <tr>
+                        <td>
+                            <input type="radio" name="selected_job" value="{{ job.id }}">
+                        </td>
+                        <td>{{ job.from_time }}</td>
+                        <td>{{ job.to_time }}</td>
+                        <td>{{ job.operational_model }}</td>
+                        <td>{{ job.description }}</td>
+                        <td>{{ job.expires_at }}</td>
+                        <td>{{ job.store_id }}</td>
+                        <td>{{ job.store_name }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+</body>
+</html>

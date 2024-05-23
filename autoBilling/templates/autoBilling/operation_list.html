@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Operation List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'autoBilling/style.css' %}">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Operation List</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Operation ID</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for operation in operations %}
+                <tr>
+                    <td>{{ operation.id }}</td>
+                    <td>
+                        <a href="{% url 'job_list' operation.id %}" class="btn btn-primary">View Jobs</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
