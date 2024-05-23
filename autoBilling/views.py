@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 import json
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
@@ -6,6 +8,12 @@ import requests
 from django.shortcuts import get_object_or_404, redirect, render
 from .forms import JobSelectionForm, SelectionForm, ProductFormSet
 from .models import Store, Persona, Product, Operation, Job
+
+
+load_dotenv()
+API_URL = os.getenv('API_URL')
+API_KEY = os.getenv('API_KEY')
+
 
 def select_items(request):
     if request.method == 'POST':
@@ -35,7 +43,8 @@ def request_availability (request):
     date_start = request.POST["fecha_inicio"]
     date_end = request.POST["fecha_fin"]
 
-    url = "https://api.xandar.instaleap.io/jobs/availability/v2"
+
+    url = f"{API_URL}/jobs/availability/v2"
     payload = {
         "origin": {
             "name": store.name,
@@ -83,7 +92,7 @@ def request_availability (request):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "x-api-key": "yoJYongi4V4m0S4LClubdyiu5nq6VIpxazcFaghi"
+        "x-api-key": API_KEY
     }
     response = requests.post(url, json=payload, headers=headers)
     return response
@@ -92,7 +101,6 @@ def createoperation(obj_operation):
     data = json.loads(obj_operation)
     with transaction.atomic():
         operation = Operation.objects.create()
-        print("----->  Operation ID = ", operation.id)
         for item in data:
             # Crear o actualizar el registro de StoreAvailable
             # Crear el registro de Job
@@ -107,7 +115,6 @@ def createoperation(obj_operation):
                 store_name=item['store']['name'],
                 operation=operation
             )
-    print("-----> Return  Operation ID = ", operation.id)
     return operation.id
 
 def operation_list(request):
@@ -134,10 +141,10 @@ def select_job(request, operation_id):
 
 
 def request_get_job(job_id):
-    url = f"https://api.xandar.instaleap.io/jobs/{job_id}"
+    url = f"{API_URL}/jobs/{job_id}"
     headers = {
         "accept": "application/json",
-        "x-api-key": "yoJYongi4V4m0S4LClubdyiu5nq6VIpxazcFaghi"
+        "x-api-key": API_KEY
     }
     response = requests.get(url, headers=headers)
     return response
@@ -158,7 +165,7 @@ def request_create_job (Job, Persona, Product):
     
     client_reference = str(Job.id) + "-" + Product.id_item
     print("client reference", client_reference)
-    url = "https://api.xandar.instaleap.io/jobs"
+    url = f"{API_URL}/jobs"
     order_value = Product.price *  Product.quantity * 1.2
     payload = {
         "recipient": {
@@ -183,7 +190,7 @@ def request_create_job (Job, Persona, Product):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "x-api-key": "yoJYongi4V4m0S4LClubdyiu5nq6VIpxazcFaghi"
+        "x-api-key": API_KEY
     }
     response = requests.post(url, json=payload, headers=headers)
     return response
@@ -215,7 +222,7 @@ def job_selection(request, operation_id):
 
 def request_billing (job_id):
     
-    url = f"https://api.xandar.instaleap.io/jobs/{job_id}/payment_info"
+    url = f"{API_URL}/jobs/{job_id}/payment_info"
 
     payload = {
         "prices": {
@@ -247,7 +254,7 @@ def request_billing (job_id):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "x-api-key": "yoJYongi4V4m0S4LClubdyiu5nq6VIpxazcFaghi"
+        "x-api-key": API_KEY
     }
 
     response = requests.put(url, json=payload, headers=headers)
